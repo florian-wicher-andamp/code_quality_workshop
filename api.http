@@ -1,0 +1,13 @@
+### Transfer funds between accounts
+POST http://localhost:7071/api/transfer
+Content-Type: application/json
+
+{
+  "from_account": "account1",
+  "to_account": "account2",
+  "amount": 50,
+  "currency": "EUR"
+}
+
+### Get account details
+GET http://localhost:7071/api/account?id=account1
