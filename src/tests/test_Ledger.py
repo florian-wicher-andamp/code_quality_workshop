@@ -4,6 +4,8 @@ from src.Account import Account
 from src.InsufficientFundsError import InsufficientFundsError
 from src.MoneyAmount import MoneyAmount
 from src.tests.CurrencyStub import EuroStub
+from src.Ledger import Transaction, Ledger
+
 
 EUR = EuroStub()
 
