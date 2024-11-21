@@ -1,7 +1,5 @@
 from src.InsufficientFundsError import InsufficientFundsError
-from src.Ledger import Ledger
 from src.MoneyAmount import MoneyAmount
-from src.Transaction import Transaction
 
 
 class Account:
@@ -9,7 +7,8 @@ class Account:
         assert name.isalnum()
 
         self.name = name
-        self._balance = balance
+        self._balance:MoneyAmount = balance
+        from src.Ledger import Ledger
         self.ledger = Ledger()
 
     def deposit(self, amount: MoneyAmount):
@@ -17,16 +16,28 @@ class Account:
         print(f"Deposited {amount} into '{self.name}'.")
 
     def withdraw(self, amount: MoneyAmount):
-        if amount > self._balance:
-            raise InsufficientFundsError()
+        self.assert_has_sufficient_funds(amount)
         self._balance -= amount
         print(f"Withdrew {amount} from '{self.name}'.")
 
+    def assert_has_sufficient_funds(self, amount):
+        if amount > self._balance:
+            raise InsufficientFundsError()
+
     def transfer(self, amount: MoneyAmount, other: 'Account'):
+        from src.Transaction import Transaction
+        self.assert_has_sufficient_funds(amount)
+        transaction = Transaction(self, other, amount)
+        from src.fraud_detection.FraudDetector import fraud_detector
+        suspicious = fraud_detector().is_suspicious(transaction)
+        if suspicious:
+            transaction.suspicious = True
+
         self.withdraw(amount)
         other.deposit(amount)
-        self.ledger.record_transaction(Transaction(self.name, other.name, amount))
-        other.ledger.record_transaction(Transaction(other.name, self.name, amount))
+
+        self.ledger.record_transaction(transaction)
+        other.ledger.record_transaction(transaction.reverse())
 
     @property
     def balance(self):

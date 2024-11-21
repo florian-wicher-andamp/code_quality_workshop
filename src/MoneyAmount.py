@@ -1,3 +1,5 @@
+from typing import Self
+
 from src.Currency import Currency
 
 
@@ -31,15 +33,22 @@ class MoneyAmount:
         else:
             return f"{self.amount_in_cents / 100:.0f} {self.currency}"
 
-    def __add__(self, other: 'MoneyAmount'):
+    def __add__(self, other: Self|float):
+        if isinstance(other, (int, float)):
+            return MoneyAmount(amount_in_cents=self.amount_in_cents + int(other * 100), currency=self.currency)
         return MoneyAmount(amount_in_cents=self.amount_in_cents + other.convert_to(self.currency).amount_in_cents,
                            currency=self.currency)
 
-    def __sub__(self, other: 'MoneyAmount'):
+    def __mul__(self, other: float):
+        return MoneyAmount(amount_in_cents=(round(self.amount_in_cents * other)), currency=self.currency)
+
+    def __sub__(self, other: Self|float):
+        if isinstance(other, (int, float)):
+            return self + (-other)
         return MoneyAmount(amount_in_cents=self.amount_in_cents - other.convert_to(self.currency).amount_in_cents,
                            currency=self.currency)
 
-    def __gt__(self, other: 'MoneyAmount'):
+    def __gt__(self, other: Self):
         return self.amount_in_cents > other.convert_to(self.currency).amount_in_cents
 
     def __eq__(self, other):

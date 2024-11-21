@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -6,6 +6,7 @@ from src.Account import Account
 from src.InsufficientFundsError import InsufficientFundsError
 from src.MoneyAmount import MoneyAmount
 from src.tests.CurrencyStub import EuroStub
+from src.tests.fraud_detection.data import demo_accounts
 
 EUR = EuroStub()
 
@@ -62,3 +63,8 @@ def test_repr_returns_correct_string():
 
     account = Account("Test", MoneyAmount(100, unicorn_sheckels))
     assert repr(account) == "Account Test"
+
+def test_txn_that_submits_two_thirds_of_total_balance_is_blocked():
+    account1, account2 = demo_accounts()
+    account1.transfer(account1.balance * (2/3) + 1, account2)
+    assert account1.ledger.transactions[0].suspicious
