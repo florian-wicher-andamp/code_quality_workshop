@@ -31,7 +31,7 @@ def test_transfer_is_recorded_in_ledger_of_sending_account():
     assert sender.ledger.transactions[0] == Transaction(sender, receiver, fiftyEuros)
 
 def test_transfer_is_recorded_in_ledger_of_receiving_account():
-    transfer_amount = MoneyAmount(70, EUR)
+    transfer_amount = MoneyAmount(1, EUR)
     sender.transfer(transfer_amount, receiver)
     assert receiver.ledger.transactions[0] == Transaction(receiver, sender, transfer_amount)
 
@@ -41,11 +41,11 @@ def test_transaction_is_not_recorded_if_insufficient_funds():
     assert len(receiver.ledger.transactions) == 0
 
 def test_get_transactions_returns_all_transactions():
-    sender.transfer(MoneyAmount(70, EUR), receiver)
-    sender.transfer(MoneyAmount(30, EUR), receiver)
+    sender.transfer(MoneyAmount(1, EUR), receiver)
+    sender.transfer(MoneyAmount(2, EUR), receiver)
     assert sender.ledger.transactions == [
-        Transaction(sender, receiver, MoneyAmount(70, EUR)),
-        Transaction(sender, receiver, MoneyAmount(30, EUR))
+        Transaction(sender, receiver, MoneyAmount(1, EUR)),
+        Transaction(sender, receiver, MoneyAmount(2, EUR))
     ]
 
 
@@ -57,3 +57,9 @@ def test_str_returns_nice_string_representation():
     assert (str(ledger) ==
             "Test1 -[50 EUR]-> Test2\n" +
             "Test1 -[10 EUR]-> Test2")
+
+def test_suspicious_txn_shows_in_ledger_representation():
+    ledger = Ledger()
+    txn = Transaction(sender, receiver, MoneyAmount(50, EUR), is_suspicious=True)
+    ledger.record_transaction(txn)
+    assert str(ledger) == "Test1 -[50 EUR]-> Test2 (suspicious)"

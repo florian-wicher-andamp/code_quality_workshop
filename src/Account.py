@@ -1,5 +1,6 @@
 from src.InsufficientFundsError import InsufficientFundsError
 from src.MoneyAmount import MoneyAmount
+from src.fraud_detection.SuspiciousTransactionError import SuspiciousTransactionError
 
 
 class Account:
@@ -32,12 +33,16 @@ class Account:
         suspicious = fraud_detector().is_suspicious(transaction)
         if suspicious:
             transaction.suspicious = True
-
-        self.withdraw(amount)
-        other.deposit(amount)
+        else:
+            self.withdraw(amount)
+            other.deposit(amount)
 
         self.ledger.record_transaction(transaction)
         other.ledger.record_transaction(transaction.reverse())
+
+        if suspicious:
+            raise SuspiciousTransactionError(transaction)
+
 
     @property
     def balance(self):
